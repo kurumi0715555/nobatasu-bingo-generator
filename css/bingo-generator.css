@@ -1,0 +1,400 @@
+/* Main Layout */
+#wordList {
+    width: 100%;
+    height: 150px;
+    padding: 0.8rem;
+    border: 2px solid var(--gray);
+    border-radius: var(--border-radius-small);
+    font-size: 1rem;
+    line-height: 1.5;
+    resize: vertical;
+    font-family: var(--font-family-mono);
+}
+
+#wordList:focus {
+    border-color: var(--primary-color);
+    outline: none;
+}
+
+.settings-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-lg);
+    align-items: center;
+    margin-bottom: var(--spacing-md);
+}
+
+.control-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.control-item label {
+    font-weight: 600;
+    color: var(--gray-darkest);
+    margin: 0;
+}
+
+.control-item select {
+    padding: 0.5rem 0.8rem;
+    border: 2px solid var(--gray);
+    border-radius: var(--border-radius-small);
+    font-size: 1rem;
+    background: var(--white);
+    cursor: pointer;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    user-select: none;
+}
+
+.action-bar {
+    display: flex;
+    justify-content: center;
+    margin-top: var(--spacing-md);
+}
+
+.output-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-sm);
+    align-items: stretch;
+}
+
+@media (max-width: 768px) {
+    .settings-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .output-buttons {
+        flex-direction: column;
+    }
+
+    .action-bar .btn,
+    .output-buttons .btn,
+    .output-buttons .pdf-group {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+
+/* Bingo Grid */
+.bingo-wrapper {
+    background: var(--white);
+    padding: 2rem;
+    border-radius: var(--border-radius-large);
+    box-shadow: var(--shadow-medium);
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+/* ビンゴ枠の濃いダーク：印刷時の輪郭としても機能する固有色（テーマ色） */
+.bingo-grid {
+    display: grid;
+    gap: 5px;
+    margin: 0 auto;
+    max-width: 600px;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    border: 4px solid #333;
+    background-color: #333;
+    padding: 5px;
+}
+
+.bingo-cell {
+    background: var(--white);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 5px;
+    cursor: pointer;
+    position: relative;
+    transition: background-color 0.2s, color 0.2s;
+    user-select: none;
+    overflow: hidden;
+    word-break: break-all;
+}
+
+.bingo-cell-content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    text-align: center;
+    font-weight: bold;
+    line-height: 1.2;
+}
+
+/* マーキング演出（蛍光黄＋赤丸）はビンゴゲームの伝統色、識別性のため固有色維持 */
+.bingo-cell.active {
+    background-color: #ffeb3b;
+    color: #000;
+}
+
+.bingo-cell.active::after {
+    content: "●";
+    position: absolute;
+    font-size: 4rem;
+    color: rgba(255, 0, 0, 0.6);
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+}
+
+.bingo-cell.free {
+    font-weight: 900;
+    color: var(--danger-color);
+    background-color: var(--danger-tint);
+}
+
+.bingo-cell:hover:not(.active) {
+    background-color: var(--gray-lighter);
+}
+
+/* Grid sizes classes will be added via JS or defined here */
+.grid-3 { grid-template-columns: repeat(3, 1fr); }
+.grid-4 { grid-template-columns: repeat(4, 1fr); }
+.grid-5 { grid-template-columns: repeat(5, 1fr); }
+
+
+/* Print Styles */
+@media print {
+    /* Hide everything that is not the bingo wrapper or essential */
+    body * {
+        visibility: hidden;
+    }
+    
+    .site-wrapper {
+        display: block;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+    }
+    
+    .container {
+        width: 100%;
+        max-width: none;
+        margin: 0;
+        padding: 0;
+        box-shadow: none;
+    }
+
+    /* Specifically hide ads and valid non-print elements */
+    .ad-left, .ad-right, .ad-horizontal, 
+    .site-header, header, footer,
+    .no-print, .class-mode-toggle,
+    .instructions,
+    iframe {
+        display: none !important;
+    }
+
+    /* Show only the bingo wrapper */
+    .bingo-wrapper, .bingo-wrapper * {
+        visibility: visible;
+    }
+
+    .bingo-wrapper {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+        box-shadow: none;
+        border: none;
+    }
+
+    .bingo-grid {
+        max-width: 90vw; /* Use most of the page width */
+        margin: 2rem auto;
+        border-width: 2px;
+    }
+    
+    .bingo-cell {
+        border: 1px solid #333; /* Ensure borders print nicely */
+    }
+
+    /* Ensure background colors print */
+    * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    /* Force page background to be white */
+    html, body, .site-wrapper, .container, .bingo-wrapper {
+        background-color: #ffffff !important;
+        background-image: none !important;
+    }
+    
+    /* Ink-saving white background for print */
+    .bingo-grid {
+        background-color: #ffffff !important;
+        border: 4px solid #000000 !important;
+        gap: 0 !important; /* Remove gap, use borders */
+    }
+
+    .bingo-cell {
+        background-color: #fff !important;
+        border: 1px solid #000 !important; /* Add distinct borders */
+        color: #000 !important;
+    }
+    
+    .bingo-cell.free {
+        background-color: #eee !important; /* Light gray for FREE is okay, or keep white */
+        color: #000 !important;
+        font-weight: bold !important;
+        border: 1px solid #000 !important;
+    }
+    
+    /* Hide active markers if any */
+    .bingo-cell.active {
+        background-color: #fff !important;
+        color: #000 !important;
+    }
+    .bingo-cell.active::after {
+        display: none !important;
+    }
+}
+
+/* Export Mode (mimics print styles for html2canvas) */
+body.export-mode .bingo-grid {
+    background-color: #fff !important;
+    border: 4px solid #000 !important;
+    gap: 0 !important;
+}
+
+body.export-mode .bingo-cell {
+    background-color: #fff !important;
+    border: 1px solid #000 !important;
+    color: #000 !important;
+}
+
+body.export-mode .bingo-cell.free {
+    background-color: #eee !important;
+    color: #000 !important;
+    font-weight: bold !important;
+    border: 1px solid #000 !important;
+}
+
+body.export-mode .bingo-cell.active {
+    background-color: #fff !important;
+    color: #000 !important;
+}
+body.export-mode .bingo-cell.active::after {
+    display: none !important;
+}
+
+/* Bulk Control */
+.bulk-control {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--gray-lighter);
+    padding: 0.2rem 0.5rem;
+    border-radius: var(--border-radius-small);
+    border: 1px solid var(--gray);
+}
+
+#sheetCount {
+    width: 60px;
+    padding: 0.4rem;
+    border: 1px solid var(--gray);
+    border-radius: var(--border-radius-small);
+    font-size: 1rem;
+    text-align: right;
+}
+
+.unit {
+    font-size: 0.9rem;
+    color: var(--gray-darker);
+}
+
+/* Loading Modal */
+.loading-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+.loading-content {
+    background: var(--white);
+    padding: 2rem;
+    border-radius: var(--border-radius-large);
+    text-align: center;
+    box-shadow: var(--shadow-large);
+}
+
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid var(--gray-lighter);
+    border-top: 4px solid var(--info-color);
+    border-radius: 50%;
+    margin: 0 auto 1rem;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+#loadingText {
+    font-size: 1.1rem;
+    color: var(--text-color);
+    font-weight: bold;
+}
+
+/* PDF Group (ボタン＋枚数入力の一体化) */
+.pdf-group {
+    display: flex;
+    background: var(--accent-color);
+    border-radius: var(--border-radius);
+    align-items: stretch;
+    overflow: hidden;
+}
+
+.pdf-group .sheet-input {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    color: var(--white);
+    font-size: 0.9rem;
+    padding: 0 0.6rem;
+}
+
+.pdf-group #sheetCount {
+    width: 52px;
+    padding: 0.25rem;
+    border: none;
+    border-radius: 3px;
+    font-size: 1rem;
+    text-align: right;
+    background: rgba(255, 255, 255, 0.95);
+    color: #000;
+}
+
+.pdf-group #savePdfBtn {
+    border-radius: 0;
+    margin: 0;
+    border-right: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+/* Hide old bulk control styles if conflict */
+.bulk-control { display: none !important; }

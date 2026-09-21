@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <meta name="description" content="単語リストからランダムなビンゴカードを作成・印刷できるツール。授業やレクリエーションに最適。無料・登録不要。">
+    
+    
+    <link rel="stylesheet" href="common/css/common.css">
+    <link rel="stylesheet" href="common/css/modal.css">
+    <link rel="stylesheet" href="common/css/landscape-guard.css">
+    <link rel="stylesheet" href="css/bingo-generator.css">
+    <link rel="stylesheet" href="common/vendor/fontawesome/css/fontawesome.css">
+<link rel="stylesheet" href="common/vendor/fontawesome/css/solid.css">
+    <script src="vendor/html2canvas/html2canvas.min.js"></script>
+    <script src="vendor/jspdf/jspdf.umd.min.js"></script>
+<title>ビンゴカードジェネレーター</title>
+<link rel="stylesheet" href="oss/standalone.css">
+<script defer src="oss/standalone.js"></script>
+</head>
+
+<body data-tablet-ok="true">
+    <!-- 授業モード切り替えボタン -->
+    <button id="classModeToggle" class="class-mode-toggle">
+        <i id="classModeIcon" class="fas fa-chalkboard"></i>
+        <span id="classModeText">授業モード OFF</span>
+    </button>
+
+    <div class="site-wrapper">
+        <!-- 左側広告エリア -->
+        <aside class="ad-left">
+            <!-- Ads injected by common-ads.js -->
+        </aside>
+
+        <div class="container">
+            <header>
+                <!-- Header banner will be injected by common-header.js -->
+                <h1><i class="fas fa-table-cells"></i> ビンゴカードジェネレーター</h1>
+                <p class="subtitle">印刷できるビンゴカードを一括生成</p>
+            </header>
+
+            <main>
+                <!-- STEP 1: 用語入力 -->
+                <section class="step-section no-print">
+                    <h2 class="section-title"><span class="step-badge">STEP 1</span> <i class="fas fa-list"></i> ビンゴに使う単語</h2>
+                    <p class="step-desc">1行に1つずつ入力してください。Excelからの貼り付けもOKです。</p>
+                    <textarea id="wordList" placeholder="例：&#13;&#10;りんご&#13;&#10;ごりら&#13;&#10;らっぱ"></textarea>
+                </section>
+
+                <!-- STEP 2: サイズ設定と作成 -->
+                <section class="step-section no-print">
+                    <h2 class="section-title"><span class="step-badge">STEP 2</span> <i class="fas fa-table-cells-large"></i> サイズを選んで作成</h2>
+                    <div class="settings-row">
+                        <div class="control-item">
+                            <label for="gridSize">マス目のサイズ</label>
+                            <select id="gridSize">
+                                <option value="3">３x３ (９マス)</option>
+                                <option value="4">４x４ (１６マス)</option>
+                                <option value="5" selected>５x５ (２５マス)</option>
+                            </select>
+                        </div>
+                        <div class="control-item" id="freeSquareOption">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="useFreeSquare" checked>
+                                真ん中をFREEにする
+                            </label>
+                        </div>
+                    </div>
+                    <div class="action-bar">
+                        <button id="generateBtn" class="btn btn-primary btn-large">
+                            <i class="fas fa-wand-magic-sparkles"></i> ビンゴカードを作成
+                        </button>
+                    </div>
+                </section>
+
+                <!-- ビンゴカード表示エリア -->
+                <div id="bingoWrapper" class="bingo-wrapper" style="display: none;">
+                    <div class="bingo-header">
+                        <h2></h2>
+                    </div>
+                    <div id="bingoGrid" class="bingo-grid">
+                        <!-- ビンゴのマスがここに生成されます -->
+                    </div>
+                </div>
+
+                <!-- STEP 3: 出力（作成後に表示） -->
+                <section class="step-section no-print output-section" id="outputSection" style="display: none;">
+                    <h2 class="section-title"><span class="step-badge">STEP 3</span> <i class="fas fa-share-from-square"></i> 印刷・保存</h2>
+                    <p class="step-desc">クリックでマスの色が変わります（画面上での確認用）。印刷・画像・PDFで出力できます。</p>
+                    <div class="output-buttons">
+                        <button id="shuffleBtn" class="btn btn-secondary">
+                            <i class="fas fa-shuffle"></i> 配置をシャッフル
+                        </button>
+                        <button id="printBtn" class="btn btn-secondary">
+                            <i class="fas fa-print"></i> 印刷
+                        </button>
+                        <button id="saveImgBtn" class="btn btn-secondary">
+                            <i class="fas fa-image"></i> 画像保存
+                        </button>
+                        <div class="pdf-group" id="pdfGroup">
+                            <button id="savePdfBtn" class="btn btn-secondary">
+                                <i class="fas fa-file-pdf"></i> PDF保存
+                            </button>
+                            <div class="sheet-input">
+                                <input type="number" id="sheetCount" min="1" max="99" value="1" title="作成枚数">
+                                <span>枚</span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 使い方 -->
+                <div class="instructions">
+                    <h3><i class="fas fa-info-circle"></i> 使い方</h3>
+                    <ol>
+                        <li><strong>単語を入力</strong>：STEP 1にビンゴで使う単語を1行ずつ入力</li>
+                        <li><strong>サイズ選択</strong>：STEP 2でマスの数を選んで「ビンゴカードを作成」</li>
+                        <li><strong>印刷・保存</strong>：STEP 3から印刷・画像・PDFで出力。PDF保存は「枚数」を指定すると、人数分の異なるカードをまとめて出力できます</li>
+                    </ol>
+                    <p class="note"><i class="fas fa-lightbulb"></i>
+                        <strong>ヒント</strong>：５x５では真ん中を「FREE」にできます。画面上のマスをクリックすると色が変わります（穴あけ確認用）。
+                    </p>
+                </div>
+
+                <!-- 処理中モーダル -->
+                <div id="loadingModal" class="loading-modal" style="display: none;">
+                    <div class="loading-content">
+                        <div class="spinner"></div>
+                        <p id="loadingText">作成中...</p>
+                    </div>
+                </div>
+            </main>
+
+            <!-- メインとフッターの間の横長広告 -->
+            <div class="ad-horizontal no-print">
+                <div class="ad-label">広告</div>
+                <div class="ad-horizontal-content">
+                    <i class="fas fa-rectangle-ad"></i>
+                    <p>728×90 レクタングル（大）バナー広告</p>
+                </div>
+            </div>
+
+            <footer>
+                <!-- Footer will be injected by common-footer.js -->
+            </footer>
+        </div>
+
+        <!-- 右側広告エリア -->
+        <aside class="ad-right">
+            <!-- Ads injected by common-ads.js -->
+        </aside>
+    </div>
+
+    <script src="common/js/class-mode.js"></script>
+    <script src="common/js/common-modal.js"></script>
+    
+    
+    
+    
+    
+    <script src="js/script.js"></script>
+    <script src="common/js/landscape-guard.js"></script>
+</body>
+
+</html>
